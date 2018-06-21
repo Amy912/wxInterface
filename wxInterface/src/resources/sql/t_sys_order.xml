@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="t_sys_order" >
+ 	<insert id="insertOrder" parameterClass="com.emagsoftware.wx.bean.WxOrder">
+		insert into t_sys_order(order_type,open_id, user_id, money, order_time,order_desc)
+		values(#orderType#,#openId#, #userId#, #money#, #orderTime#,#orderDesc#)
+		<selectKey resultClass="java.lang.Integer" keyProperty="id">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+	<update id="updateOrderById" parameterClass="java.util.Map">
+		update t_sys_order
+		<dynamic prepend="set" >
+		<isNotEmpty prepend="," property="orderNo">
+		order_no = #orderNo#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="money">
+		money = #money#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="orderTime">
+		order_time = #orderTime#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="orderDesc">
+		order_desc = #orderDesc#
+		</isNotEmpty>
+		</dynamic>
+		where id = #id#
+	</update>
+	<insert id="insertRedbag" parameterClass="com.emagsoftware.wx.bean.WxRedbag">
+		insert into t_sys_redbag(order_id,order_number, money, status, create_time)
+		values(#orderId#,#orderNumber#, #money#, #status#, #createTime#)
+		<selectKey resultClass="java.lang.Integer" keyProperty="id">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+	<insert id="insertBill" parameterClass="com.emagsoftware.wx.bean.WxBill">
+		insert into t_sys_bill(user_id,open_id, money, left_money,`desc`,bill_time, order_id)
+		values(#userId#,#openId#, #money#, #leftMoney#,#desc#, #billTime#,#orderId#)
+		<selectKey resultClass="java.lang.Integer" keyProperty="id">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+	<select id="selectOrderByOrderNo" parameterClass="java.lang.String" resultClass="com.emagsoftware.wx.bean.WxOrder">
+		select id,order_no orderNo,order_type orderType ,open_id openId ,user_id userId,money
+ from t_sys_order o where order_no = #orderNo#
+	</select>
+	<delete id="deleteOrder" parameterClass="java.lang.String">
+		delete from t_sys_order where id = #id#
+	</delete>
+	<delete id="deleteRedBag" parameterClass="java.lang.String">
+		delete from t_sys_redbag  where order_id = #orderId#
+	</delete>
+	<select id="selectOrderByMap" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		select id,order_no orderNo,order_type orderType ,open_id openId ,user_id userId,money,order_desc orderDesc,
+(select count(*) from t_sys_redbag r where r.order_id = o.id ) num,
+(select count(*) from t_sys_redbag r where r.order_id = o.id and r.status ='1') receiveNum,
+(SELECT r.money FROM t_sys_redbag r WHERE r.order_id = o.id AND r.status ='1' and user_id = #userid#) userReceive
+ from t_sys_order o where order_no = #orderNo#
+	</select>
+	
+	<select id="selectRedBagByOrderNo" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		select r.id,r.order_id orderId,r.order_number, r.money, r.status ,
+		r.user_id userId,u.nick_name nickName,u.user_icon userIcon,
+		date_format(r.update_time,'%Y-%m-%d')  receiveTime
+		from t_sys_redbag r left join t_sys_user u on r.user_id = u.id where r.order_id = #orderId#
+		<isNotEmpty prepend="and" property="status">
+		r.status  = #status#
+		</isNotEmpty>
+	</select>
+	
+	<update id="updateRedBagByOrderId" parameterClass="java.util.Map">
+		update t_sys_redbag set  user_id = #userId#,status  = #status#,update_time=#updateTime#
+		where status ='0' and order_id =#orderId# LIMIT 1
+	</update>
+	
+	<update id="updateUserMoney" parameterClass="java.util.Map">
+	UPDATE t_sys_user u SET money =(
+		SELECT SUM(m.money) FROM (
+		SELECT money FROM t_sys_redbag o WHERE order_id = #orderId# AND user_id =#userId#
+		UNION
+		SELECT money FROM t_sys_user u WHERE u.id =#userId#) m
+		) WHERE id =#userId#
+	</update>
+	
+	<select id="selectSendRedBagCount" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	  SELECT COUNT(*) num,SUM(o.money) sumMoney FROM t_sys_order o WHERE user_id =#userid# and order_type=#orderType#
+	 </select>
+	 
+	<select id="selectRedBagByUserId" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	SELECT id,order_no orderNo,order_type orderType ,open_id openId ,user_id userId,money,
+	DATE_FORMAT(o.order_time,'%m月%d日 %H:%i') orderTime,order_desc orderDesc,
+	(SELECT COUNT(*) FROM t_sys_redbag r WHERE r.order_id = o.id ) num,
+	(SELECT COUNT(*) FROM t_sys_redbag r WHERE r.order_id = o.id AND r.status ='1') receiveNum
+	 FROM t_sys_order o WHERE user_id =#userid# and order_type=#orderType#
+	 order by o.order_time desc
+	 limit #pageStart#,#pageSize#
+	 </select>
+	 <select id="selectReceiveRedBagCount" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	  SELECT COUNT(*) num,SUM(r.money) sumMoney FROM t_sys_redbag r  WHERE r.user_id=6
+	 </select>
+	 <select id="selectReceiveRedBagByUserId" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT r.money,DATE_FORMAT(r.update_time,'%m月%d日 %H:%i')  receiveTime,o.`order_desc` orderDesc FROM t_sys_redbag r 
+	  LEFT JOIN   t_sys_order o ON r.`order_id` = o.id
+	  WHERE r.user_id=#userid#
+	  ORDER BY r.update_time 
+	  limit #pageStart#,#pageSize#
+	 </select>
+	 
+</sqlMap>

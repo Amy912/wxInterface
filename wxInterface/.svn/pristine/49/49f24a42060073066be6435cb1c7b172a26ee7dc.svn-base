@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="t_sys_game">
+   
+  <select id="getQuestions" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+	 select * from ( select * from t_sys_gamequestion t where t.level = 1 order by rand() limit 6 ) t10
+		union all  select * from ( (select * from t_sys_gamequestion t1 where t1.level = 2 order by rand() limit 6)) t11
+ 	 	union all  select * from ( (select * from t_sys_gamequestion t2 where t2.level = 3 order by rand() limit 6)) t12
+		union all  select * from ( (select * from t_sys_gamequestion t3 where t3.level = 4 order by rand() limit 6)) t13
+		union all  select * from ( (select * from t_sys_gamequestion t4 where t4.level = 5 order by rand() limit 6)) t14
+		union all  select * from ( (select * from t_sys_gamequestion t5 where t5.level = 6 order by rand() limit 6)) t15
+		union all  select * from ( (select * from t_sys_gamequestion t6 where t6.level = 7 order by rand() limit 4)) t16
+   </select>
+   
+   <select id="getGameHonors" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		select t1.user_id userId ,t1.lottery_id lotteryId,t2.type,count(t1.id) total, t5.wxName, t5.wxIcon from t_sys_gamelottery_user_record t1 
+		left join t_sys_gamelottery t2 on  t1.lottery_id = t2.id
+		left join (select t3.id, t4.id wxuserId ,t4.nick_name wxName, t4.user_icon wxIcon from t_sys_gameuser t3 left join t_sys_user t4 on t3.wxuserId = t4.id ) t5 on t1.user_id = t5.id
+		where t2.type = #ltype# group by t1.user_id order by total desc
+   </select>
+   
+   <select id="getGameBackbones" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		select t1.*,t2.nick_name wxName,t2.user_icon wxIcon from t_sys_gameuser t1   
+		left join t_sys_user t2 on t1.wxuserId = t2.id
+		where t1.tryTimes > 0 order by t1.tryTimes desc
+   </select>
+   
+   <select id="getAllUserTryTimes" resultClass="java.lang.Integer">
+	    select sum(tryTimes) totalTimes from t_sys_gameuser
+   </select>
+     
+    <select id="getUserLotteryByType" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		select count(*) from t_sys_gamelottery_user_record  t1
+		left join t_sys_gamelottery t2 on t1.lottery_id = t2.id
+		where t2.type in $mytype$ and t1.user_id = #userId#
+   </select>
+   
+    <select id="getUserLotteryListByMap" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+    		select t1.id,t1.lottery_id lotteryId,t2.type,t2.content,t2.probability,t2.image_url imageUrl from t_sys_gamelottery_user_record  t1
+		left join t_sys_gamelottery t2 on t1.lottery_id = t2.id
+		where t2.type in $mytype$ and t1.user_id =  #userId#
+		<isNotEmpty prepend="AND" property="status">
+				t1.status = #status# 
+		</isNotEmpty>
+   </select>
+   
+	<select id="getUserLotteryListWithTotal" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		select t1.id,t1.lottery_id lotteryId,t2.type,t2.content,t2.probability,t2.image_url imageUrl,count(t1.id) total from t_sys_gamelottery_user_record  t1
+		left join t_sys_gamelottery t2 on t1.lottery_id = t2.id
+		where t2.type in $mytype$ and t1.user_id = #userId# and t1.status = #status# group by t1.lottery_id
+   </select> 
+     
+     
+	
+</sqlMap>

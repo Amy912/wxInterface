@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!-- 提示信息日志 -->
+	<!--<appender name="INFOLOG" class="org.apache.log4j.DailyRollingFileAppender">-->
+		<!--<param name="File" value="/Users/mac/Documents/logs/migu/info.log" />-->
+		<!--<param name="Encoding" value="UTF-8" />-->
+		<!--<param name="Append" value="true" />-->
+		<!--<param name="DatePattern" value="'.'yyyy-MM-dd" />-->
+		<!--<layout class="org.apache.log4j.PatternLayout">-->
+			<!--<param name="ConversionPattern" value="%d %-5p [%c] [%X{ID}] %m%n" />-->
+		<!--</layout>-->
+		<!--<filter class="org.apache.log4j.varia.LevelRangeFilter">-->
+			<!--<param name="LevelMin" value="INFO" />-->
+			<!--<param name="LevelMax" value="INFO" />-->
+		<!--</filter>-->
+	<!--</appender>-->
+
+
+	<!--&lt;!&ndash; 异常信息日志 &ndash;&gt;-->
+	<!--<appender name="ERRORLOG" class="org.apache.log4j.DailyRollingFileAppender">-->
+		<!--<param name="File" value="/Users/mac/Documents/logs/migu/error.log" />-->
+		<!--<param name="Encoding" value="UTF-8" />-->
+		<!--<param name="Append" value="true" />-->
+		<!--<param name="DatePattern" value="'.'yyyy-MM-dd" />-->
+		<!--<layout class="org.apache.log4j.PatternLayout">-->
+			<!--<param name="ConversionPattern" value="%d %-5p [%c] [%X{ID}] %m%n" />-->
+		<!--</layout>-->
+		<!--<filter class="org.apache.log4j.varia.LevelRangeFilter">-->
+			<!--<param name="LevelMin" value="ERROR" />-->
+			<!--<param name="LevelMax" value="ERROR" />-->
+		<!--</filter>-->
+	<!--</appender>-->
+
+	<!-- 控制台信息日志 -->
+	<appender name="Console" class="org.apache.log4j.ConsoleAppender">
+		<param name="Encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%d %-5p [%c] [%X{ID}] %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="ERROR" />
+			<param name="LevelMax" value="ERROR" />
+		</filter>
+	</appender>
+
+	<!--<appender name="DEBUGLOG" class="org.apache.log4j.DailyRollingFileAppender">-->
+		<!--<param name="File" value="/Users/mac/Documents/logs/migu/debug.log" />-->
+		<!--<param name="Encoding" value="UTF-8" />-->
+		<!--<param name="Append" value="true" />-->
+		<!--<param name="DatePattern" value="'.'yyyy-MM-dd" />-->
+		<!--<layout class="org.apache.log4j.PatternLayout">-->
+			<!--<param name="ConversionPattern" value="%-4r [%t] %-5p %c %x - %m%n" />-->
+		<!--</layout>-->
+		<!--<filter class="org.apache.log4j.varia.LevelRangeFilter">-->
+			<!--<param name="LevelMin" value="DEBUG" />-->
+			<!--<param name="LevelMax" value="DEBUG" />-->
+		<!--</filter>-->
+	<!--</appender>-->
+
+
+	<appender name="DEBUGCONSOLE" class="org.apache.log4j.ConsoleAppender">
+		<param name="Encoding" value="UTF-8" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-4r [%t] %-5p %c %x - %m%n" />
+		</layout>
+		<filter class="org.apache.log4j.varia.LevelRangeFilter">
+			<param name="LevelMin" value="DEBUG" />
+			<param name="LevelMax" value="DEBUG" />
+			-
+		</filter>
+	</appender>
+
+	<!-- 行为日志 -->
+	<!--<appender name="CUSTOMBEHAIORLOG" class="org.apache.log4j.DailyRollingFileAppender">-->
+		<!--<param name="File" value="/Users/mac/Documents/logs/migu/gf_user_access" />-->
+		<!--<param name="Encoding" value="UTF-8" />-->
+		<!--<param name="Append" value="true" />-->
+		<!--<param name="DatePattern" value="'_'yyyyMMdd_HH'_16.txt'" />-->
+		<!--<layout class="org.apache.log4j.PatternLayout">-->
+			<!--<param name="ConversionPattern" value="%m%n" />-->
+		<!--</layout>-->
+		<!--<filter class="org.apache.log4j.varia.LevelRangeFilter">-->
+			<!--<param name="LevelMin" value="INFO" />-->
+			<!--<param name="LevelMax" value="INFO" />-->
+		<!--</filter>-->
+	<!--</appender>-->
+
+	<!--&lt;!&ndash; JFCus日志 &ndash;&gt;-->
+	<!--<appender name="JFCUSLOGUTIL" class="org.apache.log4j.DailyRollingFileAppender">-->
+		<!--<param name="File" value="/Users/mac/Documents/logs/migu/jf_cus_log" />-->
+		<!--<param name="Encoding" value="UTF-8" />-->
+		<!--<param name="Append" value="true" />-->
+		<!--<param name="DatePattern" value="'_'yyyyMMddHH'_000001.txt'" />-->
+		<!--<layout class="org.apache.log4j.PatternLayout">-->
+			<!--<param name="ConversionPattern" value="%m%n" />-->
+		<!--</layout>-->
+		<!--<filter class="org.apache.log4j.varia.LevelRangeFilter">-->
+			<!--<param name="LevelMin" value="INFO" />-->
+			<!--<param name="LevelMax" value="INFO" />-->
+		<!--</filter>-->
+	<!--</appender>-->
+
+	<!-- JFH5日志 -->
+	<!--<appender name="JFH5LOGUTIL" class="org.apache.log4j.DailyRollingFileAppender">-->
+		<!--<param name="File" value="/Users/mac/Documents/logs/migu/jf_h5_log" />-->
+		<!--<param name="Encoding" value="UTF-8" />-->
+		<!--<param name="Append" value="true" />-->
+		<!--<param name="DatePattern" value="'_'yyyyMMddHH'_000002.txt'" />-->
+		<!--<layout class="org.apache.log4j.PatternLayout">-->
+			<!--<param name="ConversionPattern" value="%m%n" />-->
+		<!--</layout>-->
+		<!--<filter class="org.apache.log4j.varia.LevelRangeFilter">-->
+			<!--<param name="LevelMin" value="INFO" />-->
+			<!--<param name="LevelMax" value="INFO" />-->
+		<!--</filter>-->
+	<!--</appender>-->
+
+	<category name="com.ibatis">
+		<priority value="debug"></priority>
+	</category>
+
+
+	<logger name="com.ibatis.sqlmap.engine.impl.SqlMapClientDelegate">
+		<appender-ref ref="DEBUGCONSOLE" />
+	</logger>
+
+	<logger name="com.ibatis.common.jdbc.ScriptRunner">
+		<appender-ref ref="DEBUGCONSOLE" />
+	</logger>
+
+	<logger name="com.ibatis.common.jdbc.SimpleDataSource">
+		<appender-ref ref="DEBUGCONSOLE" />
+	</logger>
+
+	<logger name="java.sql.Connection" additivity="true">
+		<appender-ref ref="DEBUGCONSOLE" />
+	</logger>
+
+	<logger name="java.sql.Statement" additivity="true">
+		<appender-ref ref="DEBUGCONSOLE" />
+	</logger>
+
+	<logger name="java.sql.PreparedStatement" additivity="true">
+		<appender-ref ref="DEBUGCONSOLE" />
+	</logger>
+
+	<!--通过<logger></logger>的定义可以将各个包中的类日志输出到不同的日志文件中 -->
+	<!--通过<category></category>的定义可以将各个包中的类日志输出到不同的日志文件中 -->
+	<logger name="java.sql.ResultSet" additivity="true">
+		<appender-ref ref="DEBUGCONSOLE" />
+	</logger>
+
+	<!--单独打印这个类的日志，并生成文件 -->
+	<!--<logger name="com.emagsoftware.h5.util.BehaviorUtil" additivity="false">-->
+		<!--<level value="INFO" />-->
+		<!--<appender-ref ref="CUSTOMBEHAIORLOG" />-->
+	<!--</logger>-->
+
+	<!-- JFCus日志 -->
+	<!--<logger name="com.emagsoftware.custom.utils.JfCusLogUtil"-->
+		<!--additivity="false">-->
+		<!--<level value="INFO" />-->
+		<!--<appender-ref ref="JFCUSLOGUTIL" />-->
+	<!--</logger>-->
+
+	<!-- JFH5日志 -->
+	<!--<logger name="com.emagsoftware.h5.util.JfH5LogUtil" additivity="false">-->
+		<!--<level value="INFO" />-->
+		<!--<appender-ref ref="JFH5LOGUTIL" />-->
+	<!--</logger>-->
+
+	<root>
+		<priority value="DEBUG"></priority>
+		<appender-ref ref="INFOLOG" />
+		<appender-ref ref="ERRORLOG" />
+		<appender-ref ref="DEBUGLOG" />
+		<appender-ref ref="Console" />
+	</root>
+
+
+</log4j:configuration>

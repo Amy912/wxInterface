@@ -1,0 +1,244 @@
+package com.emagsoftware.inequation.service.impl;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.utils.DateUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.alibaba.fastjson.JSON;
+import com.emagsoftware.frame.utils.BaseUtils;
+import com.emagsoftware.frame.utils.Constant;
+import com.emagsoftware.frame.utils.RedisUtils;
+import com.emagsoftware.inequation.bean.GameLottery;
+import com.emagsoftware.inequation.bean.GameLotteryUserRecord;
+import com.emagsoftware.inequation.mapper.GameLotteryMapper;
+import com.emagsoftware.inequation.mapper.GameLotteryUserRecordMapper;
+import com.emagsoftware.inequation.mapper.GameUserMapper;
+import com.emagsoftware.inequation.service.GameLotteryService;
+import com.emagsoftware.inequation.service.GameUserService;
+
+/**
+ * Created by liushijie on 2018/5/11.
+ */
+@Service
+public class GameLotteryServiceImpl implements GameLotteryService {
+
+    @Autowired
+    private GameUserService userService;
+    @Autowired
+    private GameLotteryMapper gameLotteryMapper;
+    @Autowired
+    private GameLotteryUserRecordMapper gameLotteryUserRecordMapper;
+    @Autowired
+    private GameUserMapper gameUserMapper;
+
+    @Override
+    public String checkDoLottery(Integer userId) {
+        //校验用户是否有抽奖权限
+        Map<String, Object> user = userService.getUserGameInfoByUserId(userId.toString());
+        if (user.get("lotteryTimes") != null && (Integer) user.get("lotteryTimes") <= 0) {
+            return "您的抽奖次数已用完!";
+        }
+        //校验是否存在抽奖奖品
+        GameLottery searchCondition1 = new GameLottery();
+        List<GameLottery> lotteryList = gameLotteryMapper.getList(searchCondition1);
+        if (CollectionUtils.isEmpty(lotteryList)) {
+            return "无奖项";
+        }
+        return "success";
+    }
+
+    /**
+     * 抽奖
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    @Transactional
+    public GameLottery doLottery(Integer userId) throws Exception {
+        GameLottery returnBean = null;
+        //查询根节点奖项
+        GameLottery searchCondition1 = new GameLottery();
+        searchCondition1.setParentId(0);
+        List<GameLottery> lotteryList = gameLotteryMapper.getList(searchCondition1);
+        //查询抽奖记录
+        GameLotteryUserRecord searchCondition2 = new GameLotteryUserRecord();
+        searchCondition2.setUserId(userId);
+        List<GameLotteryUserRecord> recordList = gameLotteryUserRecordMapper.getList(searchCondition2);
+        //获取前几次固定奖项
+        Constant.LotteryAndCountRelEnum[] values = Constant.LotteryAndCountRelEnum.values();
+        Integer totalCount = 0;
+        for (Constant.LotteryAndCountRelEnum lac : values) {
+            totalCount += lac.getCount();
+        }
+        //抽奖结果
+        if (recordList.size() < totalCount) {
+            returnBean = this.getLotteryFalse(values, recordList, lotteryList);
+        } else {
+            returnBean = this.getLottery(lotteryList);
+        }
+        
+        //不是根节点 递归获取
+        if (returnBean.getIsLastNode().equals(0)) {
+            returnBean = this.getLastNode(returnBean);
+        }
+        System.out.println("抽奖结果为："+JSON.toJSONString(returnBean));
+        
+        //插入数据库
+        if (returnBean != null) {
+            GameLotteryUserRecord record = new GameLotteryUserRecord();
+            record.setUserId(userId);
+            record.setLotteryId(returnBean.getId());
+            record.setCreateTime(new Date());
+            if (returnBean.getEffectiveHours() != -1) {
+                record.setEffectiveTime(BaseUtils.addHours(new Date(), returnBean.getEffectiveHours()));
+            }
+            this.insertUserRecord(record);
+            gameUserMapper.updateUserDoLottery(userId);
+            this.setRedisByLottery(userId, returnBean);
+        }
+
+        return returnBean;
+    }
+
+    /**
+     * 递归 获取奖品
+     *
+     * @param returnBean
+     * @return
+     */
+    private GameLottery getLastNode(GameLottery returnBean) throws Exception {
+        //查询子节点奖项
+        GameLottery searchCondition = new GameLottery();
+        searchCondition.setParentId(returnBean.getId());
+        List<GameLottery> lotteryList = gameLotteryMapper.getList(searchCondition);
+        GameLottery g = this.getLottery(lotteryList);
+        if (g.getIsLastNode().equals(1)) {
+            return g;
+        } else {
+            return this.getLastNode(g);
+        }
+    }
+
+    /**
+     * 插入抽奖记录
+     *
+     * @param record
+     */
+    private void insertUserRecord(GameLotteryUserRecord record) {
+        gameLotteryUserRecordMapper.insertUserRecord(record);
+    }
+
+    /**
+     * 抽奖-前几次固定奖项
+     *
+     * @param values
+     * @param recordList
+     * @param gameLotteryList
+     * @return
+     */
+    private GameLottery getLotteryFalse(Constant.LotteryAndCountRelEnum[] values, List<GameLotteryUserRecord> recordList, List<GameLottery> gameLotteryList) throws Exception {
+        //获取在固定奖项中的奖项
+        Iterator it = gameLotteryList.iterator();
+        while (it.hasNext()) {
+            GameLottery g = (GameLottery) it.next();
+            boolean isRemove = true;
+            for (Constant.LotteryAndCountRelEnum lac : values) {
+                if (lac.getType().equals(g.getType())) {
+                    Integer recordCount = 0;
+                    for (GameLotteryUserRecord record : recordList) {
+                        if (record.getLotteryId().equals(g.getId())) {
+                            recordCount++;
+                        }
+                    }
+                    Integer lastCount = lac.getCount() - recordCount;
+                    if (lastCount > 0) {
+                        isRemove = false;
+                        g.setProbability(new BigDecimal(lastCount));
+                    }
+                    break;
+                }
+            }
+            if (isRemove) {
+                it.remove();
+            }
+        }
+        return this.getLottery(gameLotteryList);
+    }
+
+    /**
+     * 抽奖
+     *
+     * @param lotteryList
+     * @return
+     * @throws Exception
+     */
+    private GameLottery getLottery(List<GameLottery> lotteryList) throws Exception {
+        int random = -1;
+        //计算总权重
+        BigDecimal sumWeight = new BigDecimal("0");
+        for (GameLottery g : lotteryList) {
+            sumWeight = sumWeight.add(g.getProbability());
+        }
+
+        //产生随机数
+        BigDecimal randomNumber;
+        randomNumber = new BigDecimal(Math.random());
+
+        //根据随机数在所有奖品分布的区域并确定所抽奖品
+        BigDecimal d1 = new BigDecimal("0");
+        BigDecimal d2 = new BigDecimal("0");
+        for (int i = 0; i < lotteryList.size(); i++) {
+            d2 = lotteryList.get(i).getProbability().divide(sumWeight, 10, BigDecimal.ROUND_UP).add(d2);
+            if (i == 0) {
+                d1 = new BigDecimal("0");
+            } else {
+                d1 = lotteryList.get(i - 1).getProbability().divide(sumWeight, 10, BigDecimal.ROUND_UP).add(d1);
+            }
+            if (randomNumber.compareTo(d1) != -1
+                    && randomNumber.compareTo(d2) != 1) {
+                random = i;
+                break;
+            }
+        }
+        return lotteryList.get(random);
+    }
+
+    /**
+     * 抽奖结果更新跳转次数
+     *
+     * @param userId
+     * @param lottery
+     */
+    public void setRedisByLottery(Integer userId, GameLottery lottery) {
+        //抽奖产生抽中的奖品type[4:3次挑战机会 5:5次挑战机会] userId createTime
+        String type = lottery.getType().toString();
+        String today = DateUtils.formatDate(new Date(), "yyyy-MM-dd");
+        String lotteryTimes = RedisUtils.get(userId + "lottery" + today);
+        int chance = 0;
+        int addchance = 0;
+        if ("4".equals(type)) {
+            addchance = 3;
+        } else if ("5".equals(type)) {
+            addchance = 5;
+        }
+        if (lotteryTimes != null && StringUtils.isNotBlank(lotteryTimes)) {
+            chance = Integer.parseInt(lotteryTimes);
+        }
+        if (chance == 0) {
+            RedisUtils.add(userId + "lottery" + today, addchance + "", 2880 * 60);
+        } else {
+            chance = chance + addchance;
+            RedisUtils.add(userId + "lottery" + today, chance + "");
+        }
+    }
+}

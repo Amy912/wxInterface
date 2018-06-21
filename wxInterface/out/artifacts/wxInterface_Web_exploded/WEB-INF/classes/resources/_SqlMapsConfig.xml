@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-config-2.dtd">
+
+<sqlMapConfig>
+	<settings cacheModelsEnabled="true" enhancementEnabled="true"
+		lazyLoadingEnabled="true" useStatementNamespaces="true"
+		classInfoCacheEnabled="true" statementCachingEnabled="true" />
+	<sqlMap resource="resources/sql/t_sys_user.xml" />
+	<sqlMap resource="resources/sql/t_sys_order.xml" />
+	
+	<sqlMap resource="resources/sql/t_sys_game.xml" />
+	<sqlMap resource="resources/sql/t_sys_gameuser.xml" />
+</sqlMapConfig>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd" >
+<sqlMap namespace="t_sys_user" >
+ 	<insert id="insertUser" parameterClass="com.emagsoftware.wx.bean.WxUser">
+		insert into t_sys_user(app_id,open_id, union_id,nick_name, money,create_time,user_icon)
+		values(#appId# ,#openId#, #unionId#,#nickName#, #money#,#createTime#,#userIcon#)
+		<selectKey resultClass="java.lang.Integer" keyProperty="id">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+	<select id="selectUserInfoByOpenId" parameterClass="java.util.Map" resultClass="com.emagsoftware.wx.bean.WxUser">
+		select id,app_id appId,open_id openId, union_id unionId, money,nick_name nickName,create_time createTime,user_icon userIcon
+		from t_sys_user
+		where open_id = #openId#
+		<isNotEmpty prepend="and" property="appId">
+			app_id = #appId#
+		</isNotEmpty>
+	</select>
+	<update id="updateUserInfoById" parameterClass="java.util.Map">
+		update t_sys_user
+		<dynamic prepend="set" >
+		<isNotEmpty prepend="," property="nickName">
+		nick_name = #nickName#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="money">
+		money = #money#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="unionId">
+		union_id = #unionId#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="userIcon">
+		user_icon = #userIcon#
+		</isNotEmpty>
+		</dynamic>
+		where id = #id#
+	</update>
+	<select id="selectUserInfoByUserId" parameterClass="java.util.Map" resultClass="com.emagsoftware.wx.bean.WxUser">
+		select id,app_id appId,open_id openId, union_id unionId, money,nick_name nickName,create_time createTime,user_icon userIcon
+		from t_sys_user
+		where id = #id#
+	</select>
+	
+</sqlMap>

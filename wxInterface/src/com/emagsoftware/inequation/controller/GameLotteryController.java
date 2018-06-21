@@ -1,0 +1,62 @@
+package com.emagsoftware.inequation.controller;
+
+import com.emagsoftware.frame.log4j.ILog;
+import com.emagsoftware.frame.log4j.Logger;
+import com.emagsoftware.inequation.bean.GameLottery;
+import com.emagsoftware.inequation.service.GameLotteryService;
+import net.sf.json.JSONObject;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * 游戏抽奖 Created by liushijie on 2018/5/11.
+ */
+@Controller
+public class GameLotteryController {
+    @Logger
+    private ILog logger;
+
+    @Autowired
+    private GameLotteryService gameLotteryService;
+
+    /**
+     * 游戏抽奖
+     *
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/gameLottery/doLottery", method = {RequestMethod.GET, RequestMethod.POST}, produces = "application/json;charset=utf-8")
+    @ResponseBody
+    public String getGameUserInfo(HttpServletRequest request) {
+        String userId = request.getSession().getAttribute("inequationGameUserId") == null ? "" : request.getSession().getAttribute("inequationGameUserId").toString();
+    		JSONObject jsonObject = new JSONObject();
+        try {
+            if (StringUtils.isNotBlank(userId)) {
+                synchronized (userId.intern()) {
+                    // 校验是否能抽奖
+                    String checkMsg = gameLotteryService.checkDoLottery(Integer.parseInt(userId));
+                    // 抽奖
+                    if ("success".equals(checkMsg)) {
+                        GameLottery gameLottery = gameLotteryService.doLottery(Integer.parseInt(userId));
+                        jsonObject.put("msg", "success");
+                        jsonObject.put("data", gameLottery);
+                    } else {
+                        jsonObject.put("msg", checkMsg);
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            jsonObject.put("msg", e.getMessage());
+            e.printStackTrace();
+            logger.error(e.getMessage());
+        }
+        return jsonObject.toString();
+    }
+
+}

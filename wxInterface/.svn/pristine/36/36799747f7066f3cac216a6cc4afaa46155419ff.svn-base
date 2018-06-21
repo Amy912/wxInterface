@@ -1,0 +1,7 @@
+#微信小程序
+wx.little.appid = wxd1a56d49be0fd7e8
+wx.little.secret = 9025f245beff0279184f00269a3af464
+
+#商户
+wx.shanghu.id = 1488420152
+wx.shanghu.key = emagnsr20170906emagnsr20170906aa

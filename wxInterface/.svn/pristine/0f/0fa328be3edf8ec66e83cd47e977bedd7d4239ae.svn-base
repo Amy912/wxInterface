@@ -1,0 +1,27 @@
+#微信小程序
+wx.little.appid = wxd1a56d49be0fd7e8
+wx.little.secret = 9025f245beff0279184f00269a3af464
+
+#商户
+wx.shanghu.id = 1488420152
+wx.shanghu.key = emagnsr20170906emagnsr20170906aa
+
+#不等式风暴题目据各难度提取个数约定
+game.grade0=10;10;10;10;0;0;0
+game.grade1=10;7;7;8;8;0;0
+game.grade2=7;8;8;8;9;0;0
+game.grade3=5;5;5;5;5;10;5
+game.grade4=5;5;9;7;5;5;4
+
+#不等式风暴抽奖类型约定
+#现金类型
+game.lottery.cash=6;7;8
+#优惠券类型
+game.lottery.voucher=2;3
+#挑战次数类型
+game.lottery.chance=4;5
+#娃娃券类型
+game.lottery.doll=1;
+
+game.lottery.ruletype=6;7;8
+game.lottery.rulechance=2;1;1

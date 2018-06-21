@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING //DTD BEAN//EN"
+        "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+    <!-- DB 数据源 -->
+    <!--<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"-->
+    <!--destroy-method="close">-->
+    <!--<property name="driverClass">-->
+    <!--<value>com.mysql.jdbc.Driver</value>-->
+    <!--</property>-->
+    <!--&lt;!&ndash; 测试环境 &ndash;&gt;-->
+    <!--<property name="jdbcUrl">-->
+    <!--<value>jdbc:mysql://192.168.167.202:3306/wx?useUnicode=true&amp;characterEncoding=UTF-8</value>-->
+    <!--</property>-->
+    <!--<property name="user" value="sns" />-->
+    <!--<property name="password" value="emagtestsns" />-->
+
+    <!--&lt;!&ndash; 现网环境 &ndash;&gt;-->
+    <!--&lt;!&ndash;-->
+    <!--<property name="jdbcUrl">-->
+    <!--<value>jdbc:mysql://192.168.97.204:3306/miguapp?useUnicode=true&amp;characterEncoding=UTF-8</value>-->
+    <!--</property>-->
+    <!--<property name="user" value="miguapp" />-->
+    <!--<property name="password" value="fgxm5HjP" />-->
+    <!--&ndash;&gt;-->
+    <!--</bean>-->
+
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+        <property name="driverClassName">
+            <value>com.mysql.jdbc.Driver</value>
+        </property>
+        <property name="url">
+            <value>jdbc:mysql://192.168.167.202:3306/wx?useUnicode=true&amp;characterEncoding=UTF-8</value>
+        </property>
+        <property name="username" value="sns"/>
+        <property name="password" value="emagtestsns"/>
+        <!-- 初始化连接大小 -->
+        <!--<property name="initialSize" value="0"></property>-->
+        <!--&lt;!&ndash; 连接池最大数量 &ndash;&gt;-->
+        <!--<property name="maxTotal" value="20"></property>-->
+        <!--&lt;!&ndash; 连接池最大空闲 &ndash;&gt;-->
+        <!--<property name="maxIdle" value="20"></property>-->
+        <!--&lt;!&ndash; 连接池最小空闲 &ndash;&gt;-->
+        <!--<property name="minIdle" value="1"></property>-->
+        <!--&lt;!&ndash; 获取连接最大等待时间 &ndash;&gt;-->
+        <!--<property name="maxWaitMillis" value="10000"></property>-->
+    </bean>
+</beans>

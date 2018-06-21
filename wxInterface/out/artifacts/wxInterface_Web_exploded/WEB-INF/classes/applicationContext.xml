@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <context:annotation-config/>
+    <mvc:annotation-driven/>
+    <task:annotation-driven/>
+
+    <!--自动扫描注解的Controller -->
+    <context:component-scan base-package="com.emagsoftware">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!-- db配置文件 -->
+    <import resource="classpath:resources/_dbconnection.xml"/>
+
+
+    <!-- 事务管理 -->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- 配置事务特性 ，配置add、delete和update开始的方法，事务传播特性为required -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="insert*"/>
+            <tx:method name="update*"/>
+            <tx:method name="save*"/>
+            <tx:method name="delete*"/>
+            <tx:method name="*" propagation="SUPPORTS"/>
+        </tx:attributes>
+    </tx:advice>
+    <!-- 配置那些类的方法进行事务管理 -->
+    <aop:config>
+        <aop:advisor pointcut="execution(* *..service.impl.*.*(..))" advice-ref="txAdvice"/>
+    </aop:config>
+
+    <!-- MyBatis配置 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 加载mybatis的全局配置文件 -->
+        <property name="configLocation" value="classpath:resources/mybatis/mybatis-config.xml"/>
+        <!-- 显式指定Mapper文件位置 -->
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:resources/mybatis/mapper/*.xml</value>
+            </list>
+        </property>
+    </bean>
+    <!-- mapper扫描器 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!-- 扫描包路径，如果需要扫描多个包，中间使用半角逗号隔开  -->
+        <property name="basePackage" value="com.emagsoftware.inequation.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+    <!-- iBatis -->
+    <bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+        <property name="configLocation">
+            <value>classpath:resources/_SqlMapsConfig.xml</value>
+        </property>
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource">
+        </property>
+    </bean>
+
+    <bean id="logBeanPocessor" class="com.emagsoftware.frame.log4j.LogBeanPostProcessor"/>
+    <!--<bean id="logAspect" class="com.emagsoftware.frame.aspect.LogAspect" />-->
+
+    <!-- 拦截器 -->
+    <!--
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/*/*" />
+            <mvc:mapping path="/*" />
+            <bean class="com.emagsoftware.frame.interceptor.CheckHeadInterceptor">
+            </bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+ -->
+
+    <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
+
+</beans>

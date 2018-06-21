@@ -1,0 +1,28 @@
+package com.emagsoftware.frame.listener;
+
+import javax.servlet.ServletContextEvent;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+
+import com.emagsoftware.frame.utils.ConfigCache;
+
+public class ContextLoaderListener extends org.springframework.web.context.ContextLoaderListener {
+
+	public void contextInitialized(ServletContextEvent event) {
+		super.contextInitialized(event);
+		ApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(event.getServletContext());
+		SpringContext.setContext(context);
+		ConfigCache.readConfigCache();
+		// AlarmConfigCache.readConfigCache();
+		// 启动定时任务
+		// Timer timer = new Timer();
+		// AlarmTimeTask alarmTask = new AlarmTimeTask();
+		// timer.scheduleAtFixedRate(alarmTask, 0, 60000); // 任务 0秒后开始进行重复的固定速率执行（1分钟重复一次）
+		// System.setProperty(Constant.Global.PROJECT_HOME,ConfigCache.getBasePath() );
+	}
+
+	public void contextDestroyed(ServletContextEvent event) {
+		super.contextDestroyed(event);
+	}
+}

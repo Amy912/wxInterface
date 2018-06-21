@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.emagsoftware.inequation.mapper.GameLotteryUserRecordMapper">
+    <!--查询-->
+    <select id="getList" parameterType="com.emagsoftware.inequation.bean.GameLotteryUserRecord"
+            resultType="com.emagsoftware.inequation.bean.GameLotteryUserRecord">
+        SELECT * FROM t_sys_gamelottery_user_record
+        <where>
+            <if test="userId != null">user_id=#{userId}</if>
+            <if test="lotteryId != null">and lottery_id=#{lotteryId}</if>
+        </where>
+    </select>
+
+    <!--新增-->
+    <insert id="insertUserRecord" parameterType="com.emagsoftware.inequation.bean.GameLotteryUserRecord"
+            keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO t_sys_gamelottery_user_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="lotteryId != null">lottery_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="effectiveTime != null">effective_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="lotteryId != null">#{lotteryId},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="effectiveTime != null">#{effectiveTime},</if>
+        </trim>
+    </insert>
+</mapper>

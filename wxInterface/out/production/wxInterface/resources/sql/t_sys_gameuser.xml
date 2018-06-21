@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="t_sys_gameuser">
+  
+   <insert id="insertLoginUser"  parameterClass="java.util.Map">
+   	   INSERT INTO t_sys_gameuser(wxuserId
+		<isNotEmpty  prepend="," property="createTime">
+		  	createTime
+		</isNotEmpty>
+		<isNotEmpty  prepend="," property="ownTimes">
+		  	ownTimes
+		</isNotEmpty>
+		<isNotEmpty  prepend="," property="unionId">
+		  	unionId
+		</isNotEmpty>
+		) VALUES( #wxuserId#
+  		<isNotEmpty  prepend="," property="createTime">
+			#createTime#
+		</isNotEmpty>
+		<isNotEmpty  prepend="," property="ownTimes">
+			#ownTimes#
+		</isNotEmpty>
+		<isNotEmpty  prepend="," property="unionId">
+			#unionId#
+		</isNotEmpty>
+  		) 
+		<selectKey resultClass="java.lang.Integer" keyProperty="id">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+  	</insert>
+	
+	<select id="searchLoginUser" resultClass="com.emagsoftware.inequation.bean.GameUser" parameterClass="java.util.Map">
+	    select *  from t_sys_gameuser
+       <dynamic prepend="WHERE">	
+			<isNotEmpty prepend="AND" property="id">
+				id = #id# 
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="wxuserId">
+				wxuserId = #wxuserId# 
+			</isNotEmpty>
+		</dynamic>
+     </select>
+     
+     <update id="updateUserInfo" parameterClass="java.util.Map">
+		update t_sys_gameuser
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="name">
+			name = #name#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="ownTimes">
+			ownTimes = ownTimes -1
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="tryTimes">
+			tryTimes = tryTimes + 1
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="successTimes">
+			successTimes = successTimes + 1
+			</isNotEmpty>
+			<!-- 初始的抽奖次数 -->
+			<isNotEmpty prepend="," property="lottery">
+			lotteryTimes = #lottery#
+			</isNotEmpty>
+			<!-- 每次抽奖，次数递减 -->
+			<isNotEmpty prepend="," property="lotteryTimes">
+			lotteryTimes = lotteryTimes - 1 
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="usedLotteryTimes">
+			usedLotteryTimes = usedLotteryTimes + 1 
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="highScore">
+			highScore = #highScore#
+			</isNotEmpty>
+		</dynamic>
+		where id = #id#
+	</update>
+	
+	<select id="searchUserGameInfo" resultClass="java.util.HashMap" parameterClass="java.lang.String">
+	  	select  * from t_sys_gameuser where id = #userId#
+     </select>
+     
+     <insert id="insertLoginUserComplaint"  parameterClass="java.util.Map">
+   	   INSERT INTO t_sys_gamecomplaint(userId
+		<isNotEmpty  prepend="," property="type">
+		  	ctype
+		</isNotEmpty>
+		<isNotEmpty  prepend="," property="createTime">
+		  	createTime
+		</isNotEmpty>
+		) VALUES(#userId#
+		<isNotEmpty  prepend="," property="type">
+			#type#
+		</isNotEmpty>
+		<isNotEmpty  prepend="," property="createTime">
+			#createTime#
+		</isNotEmpty>
+  		) 
+		<selectKey resultClass="java.lang.Integer" keyProperty="id">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+  	</insert>
+  	
+  	<insert id="insertUserShareInfo"  parameterClass="java.util.Map">
+	    INSERT INTO t_sys_gameshare(userId
+			<isNotEmpty  prepend="," property="openGId">
+			  	openGId
+			</isNotEmpty>
+			<isNotEmpty  prepend="," property="shareTime">
+			  	shareTime
+			</isNotEmpty>
+			) VALUES( #userId#
+	  		<isNotEmpty  prepend="," property="openGId">
+				#openGId#
+			</isNotEmpty>
+			<isNotEmpty  prepend="," property="shareTime">
+				#shareTime#
+			</isNotEmpty>
+	  		) 
+			<selectKey resultClass="java.lang.Integer" keyProperty="id">
+				SELECT @@IDENTITY AS id
+			</selectKey>
+	  	</insert>
+	  	
+	 <select id="getUserShareByMap" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		select * from t_sys_gameshare where 1=1 
+		<isNotEmpty prepend="AND" property="userId">
+			userId = #userId# 
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="openGId">
+			openGId = #openGId# 
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="shareTime">
+			shareTime = #shareTime# 
+		</isNotEmpty>
+    </select>
+    
+    <insert id="insertUserLotteryRecord" parameterClass="java.util.Map">
+		insert t_sys_gamelottery_receive(userId,lotteryId
+		<isNotEmpty  prepend="," property="name">
+		  	userName
+		</isNotEmpty>
+		<isNotEmpty  prepend="," property="phone">
+		  	phone
+		</isNotEmpty>
+		<isNotEmpty  prepend="," property="address">
+		  	address
+		</isNotEmpty>
+		) VALUES(#userId#,#lotteryId#
+		<isNotEmpty  prepend="," property="name">
+			#name#
+		</isNotEmpty>
+		<isNotEmpty  prepend="," property="phone">
+			#phone#
+		</isNotEmpty>
+		<isNotEmpty  prepend="," property="address">
+			#address#
+		</isNotEmpty>
+  		) 
+		<selectKey resultClass="java.lang.Integer" keyProperty="id">
+			SELECT @@IDENTITY AS id
+		</selectKey>
+	</insert>
+	
+    
+     <update id="updateLotteryRecordStatus" parameterClass="java.util.Map">
+		update t_sys_gamelottery_user_record set status = 1 where user_id = #userId#
+		<isNotEmpty prepend="AND" property="lotteryId">
+				lottery_id = #lotteryId# 
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="lotteryType">
+				lottery_id in (select t.id from t_sys_gamelottery t where type in $lotteryType$ )
+		</isNotEmpty>
+	</update>
+	
+     <update id="updateWeiXinUserInfo" parameterClass="java.util.Map">
+		update t_sys_user
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="wxName">
+				nick_name = #wxName#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="wxIcon">
+				user_icon = #wxIcon#
+			</isNotEmpty>
+		</dynamic>
+		where id = #sysuserid#
+	</update>
+	
+</sqlMap>
